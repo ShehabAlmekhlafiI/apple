@@ -24,7 +24,7 @@
                 <li class="nav-item"><a class="nav-link" href="index.html">الرئيسية</a></li>
                 <li class="nav-item"><a class="nav-link" href="hardware.html">المنتجات</a></li>
                 <li class="nav-item"><a class="nav-link" href="contact.html">تواصل معنا</a></li>
-                <li class="nav-item"><a class="nav-link active" href="login.html">دخول وحساب</a></li>
+                <li class="nav-item"><a class="nav-link active" href="login.html">تسجيل الدخول</a></li>
             </ul>
         </div>
 
@@ -34,34 +34,38 @@
             <!-- نموذج تسجيل الدخول -->
             <div id="loginSection">
                 <h4 class="text-info mb-3">تسجيل الدخول</h4>
-                <div class="mb-3">
-                    <label class="form-label">البريد الإلكتروني</label>
-                    <input type="email" class="form-control bg-dark text-light border-secondary" placeholder="name@example.com">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">كلمة المرور</label>
-                    <input type="password" class="form-control bg-dark text-light border-secondary" placeholder="**">
-                </div>
-                <button type="button" class="btn btn-info w-100 fw-bold" onclick="showToast('تم تسجيل الدخول بنجاح')">دخول</button>
+                <form onsubmit="handleLogin(event)">
+                    <div class="mb-3">
+                        <label class="form-label">البريد الإلكتروني</label>
+                        <input type="email" id="loginEmail" class="form-control bg-dark text-light border-secondary" placeholder="name@example.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">كلمة المرور</label>
+                        <input type="password" id="loginPass" class="form-control bg-dark text-light border-secondary" placeholder="**" required>
+                    </div>
+                    <button type="submit" class="btn btn-info w-100 fw-bold">دخول</button>
+                </form>
                 <p class="text-center mt-3 text-clear-muted small">ليس لديك حساب؟ <a href="#" onclick="toggleForm()" class="text-info">إنشاء حساب جديد</a></p>
             </div>
 
             <!-- نموذج إنشاء حساب (مخفي افتراضياً) -->
             <div id="registerSection" style="display: none;">
                 <h4 class="text-info mb-3">إنشاء حساب جديد</h4>
-                <div class="mb-3">
-                    <label class="form-label">الاسم الكامل</label>
-                    <input type="text" class="form-control bg-dark text-light border-secondary" placeholder="المهندس شهاب">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">البريد الإلكتروني</label>
-                    <input type="email" class="form-control bg-dark text-light border-secondary" placeholder="name@example.com">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">كلمة المرور</label>
-                    <input type="password" class="form-control bg-dark text-light border-secondary" placeholder="**">
-                </div>
-                <button type="button" class="btn btn-success w-100 fw-bold" onclick="showToast('تم إنشاء الحساب بنجاح')">تسجيل</button>
+                <form onsubmit="handleRegister(event)">
+                    <div class="mb-3">
+                        <label class="form-label">الاسم الكامل</label>
+                        <input type="text" id="regName" class="form-control bg-dark text-light border-secondary" placeholder="المهندس شهاب" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">البريد الإلكتروني</label>
+                        <input type="email" id="regEmail" class="form-control bg-dark text-light border-secondary" placeholder="name@example.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">كلمة المرور</label>
+                        <input type="password" id="regPass" class="form-control bg-dark text-light border-secondary" placeholder="**" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 fw-bold">تسجيل</button>
+                </form>
                 <p class="text-center mt-3 text-clear-muted small">لديك حساب بالفعل؟ <a href="#" onclick="toggleForm()" class="text-info">تسجيل الدخول</a></p>
             </div>
 
@@ -97,6 +101,32 @@
                 regSec.style.display = 'block';
             }
         }
+
+        function handleLogin(event) {
+            event.preventDefault(); // منع إعادة تحميل الصفحة
+            var email = document.getElementById('loginEmail').value;
+            var pass = document.getElementById('loginPass').value;
+            
+            if(email.trim() === "" || pass.trim() === "") {
+                showToast("الرجاء تعبئة جميع الحقول المطلوبة!");
+                return;
+            }
+            showToast("تم تسجيل الدخول بنجاح، مرحباً بك!");
+        }
+
+        function handleRegister(event) {
+            event.preventDefault(); // منع إعادة تحميل الصفحة
+            var name = document.getElementById('regName').value;
+            var email = document.getElementById('regEmail').value;
+            var pass = document.getElementById('regPass').value;
+
+            if(name.trim() === "" || email.trim() === "" || pass.trim() === "") {
+                showToast("الرجاء تعبئة جميع الحقول المطلوبة!");
+                return;
+            }
+            showToast("تم إنشاء الحساب بنجاح، أهلاً بك يا مهندس شهاب!");
+        }
+
         function showToast(msg) {
             document.getElementById('toastMsg').innerText = msg;
             var tEl = document.getElementById('myToast');
