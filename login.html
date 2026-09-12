@@ -41,14 +41,14 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">كلمة المرور</label>
-                        <input type="password" id="loginPass" class="form-control bg-dark text-light border-secondary" placeholder="**" required>
+                        <input type="password" id="loginPass" class="form-control bg-dark text-light border-secondary" placeholder="6 خانات على الأقل" required>
                     </div>
                     <button type="submit" class="btn btn-info w-100 fw-bold">دخول</button>
                 </form>
                 <p class="text-center mt-3 text-clear-muted small">ليس لديك حساب؟ <a href="#" onclick="toggleForm()" class="text-info">إنشاء حساب جديد</a></p>
             </div>
 
-            <!-- نموذج إنشاء حساب (مخفي افتراضياً) -->
+            <!-- نموذج إنشاء حساب -->
             <div id="registerSection" style="display: none;">
                 <h4 class="text-info mb-3">إنشاء حساب جديد</h4>
                 <form onsubmit="handleRegister(event)">
@@ -61,10 +61,10 @@
                         <input type="email" id="regEmail" class="form-control bg-dark text-light border-secondary" placeholder="name@example.com" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">كلمة المرور</label>
+                        <label class="form-label">كلمة المرور (6 أحرف أو أرقام على الأقل)</label>
                         <input type="password" id="regPass" class="form-control bg-dark text-light border-secondary" placeholder="**" required>
                     </div>
-                    <button type="submit" class="btn btn-success w-100 fw-bold">تسجيل</button>
+                    <button type="submit" class="btn btn-success w-100 fw-bold">تسجيل الحساب</button>
                 </form>
                 <p class="text-center mt-3 text-clear-muted small">لديك حساب بالفعل؟ <a href="#" onclick="toggleForm()" class="text-info">تسجيل الدخول</a></p>
             </div>
@@ -80,7 +80,7 @@
     <!-- إشعار الـ Toast -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
         <div id="myToast" class="toast" role="alert">
-            <div class="toast-header bg-success text-white">
+            <div class="toast-header bg-success text-white" id="toastHeader">
                 <strong class="me-auto">إشعار النظام</strong>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
             </div>
@@ -102,33 +102,70 @@
             }
         }
 
-        function handleLogin(event) {
-            event.preventDefault(); // منع إعادة تحميل الصفحة
-            var email = document.getElementById('loginEmail').value;
-            var pass = document.getElementById('loginPass').value;
-            
-            if(email.trim() === "" || pass.trim() === "") {
-                showToast("الرجاء تعبئة جميع الحقول المطلوبة!");
-                return;
-            }
-            showToast("تم تسجيل الدخول بنجاح، مرحباً بك!");
-        }
-
+        // دالة إنشاء حساب جديد والتحقق من الشروط
         function handleRegister(event) {
-            event.preventDefault(); // منع إعادة تحميل الصفحة
-            var name = document.getElementById('regName').value;
-            var email = document.getElementById('regEmail').value;
+            event.preventDefault();
+            var name = document.getElementById('regName').value.trim();
+            var email = document.getElementById('regEmail').value.trim();
             var pass = document.getElementById('regPass').value;
 
-            if(name.trim() === "" || email.trim() === "" || pass.trim() === "") {
-                showToast("الرجاء تعبئة جميع الحقول المطلوبة!");
+            // شرط طول كلمة المرور (6 خانات على الأقل)
+            if (pass.length < 6) {
+                showToast("كلمة المرور يجب ألا تقل عن 6 خانات أو حروف!", true);
                 return;
             }
-            showToast("تم إنشاء الحساب بنجاح، أهلاً بك يا مهندس شهاب!");
+
+            // التحقق هل البريد مسجل مسبقاً في الذاكرة المحلية
+            if (localStorage.getItem(email)) {
+                showToast("هذا البريد الإلكتروني مسجل مسبقاً، حاول تسجيل الدخول!", true);
+                return;
+            }
+
+            // حفظ بيانات المستخدم في التخزين المحلي
+            var userData = { name: name, pass: pass };
+            localStorage.setItem(email, JSON.stringify(userData));
+
+            showToast("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن.", false);
+            
+            // التبديل تلقائياً لواجهة تسجيل الدخول بعد التسجيل الناجح
+            setTimeout(function() {
+                toggleForm();
+            }, 1500);
         }
 
-        function showToast(msg) {
+        // دالة تسجيل الدخول والتحقق من البيانات المخزنة
+        function handleLogin(event) {
+            event.preventDefault();
+            var email = document.getElementById('loginEmail').value.trim();
+            var pass = document.getElementById('loginPass').value;
+
+            // جلب البيانات المخزنة لنفس البريد
+            var storedUser = localStorage.getItem(email);
+
+            if (!storedUser) {
+                showToast("البريد الإلكتروني غير مسجل، يرجى إنشاء حساب جديد أولاً!", true);
+                return;
+            }
+
+            var userObj = JSON.parse(storedUser);
+
+            // التحقق من صحة كلمة المرور
+            if (userObj.pass !== pass) {
+                showToast("كلمة المرور غير صحيحة!", true);
+                return;
+            }
+
+            showToast("تم تسجيل الدخول بنجاح، أهلاً بك يا " + userObj.name + "!", false);
+        }
+
+        function showToast(msg, isError) {
             document.getElementById('toastMsg').innerText = msg;
+            var headerEl = document.getElementById('toastHeader');
+            if (isError) {
+                headerEl.className = "toast-header bg-danger text-white";
+            } else {
+                headerEl.className = "toast-header bg-success text-white";
+            }
             var tEl = document.getElementById('myToast');
             var t = new bootstrap.Toast(tEl);
             t.show();
